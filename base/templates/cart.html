@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <title>Cart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #4c83ff, #72e2ff);
+        
+        }
+
+        .container  {
+            width: 80%;
+            margin-bottom: auto;
+            overflow: hidden;
+        }
+        h1{
+            text-align:center;
+        }
+        
+
+        .cart-header, .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .cart-header {
+            background-color: #343a40;
+            color: white;
+        }
+
+        .cart-item {
+            background-color: #fff;
+        }
+
+        .cart-total {
+            text-align: center;
+            padding: 10px;
+            background-color: #f8f9fa;
+            font-size: 1.2em;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #28a745;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: #218838;
+        }
+        .btn-warning {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #0934f5;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+
+        .btn-warning:hover {
+            background-color: #1aa0c9;
+        }
+        .btn-danger {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #f10a0a;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+
+        .btn-danger:hover {
+            background-color: #f5525a;
+        }
+        .btn-secondary {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #070707;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-controls button {
+            background-color: #28a745;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin: 0 5px;
+        }
+
+        .quantity-controls button:hover {
+            background-color: #218838;
+        }
+        .loader {
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: none; /* Hide loader by default */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none; /* Hide overlay by default */
+        }
+    </style>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Your Cart</h1>
+        <div class="cart-header">
+            <div>Product</div>
+            <div>Price</div>
+            <div>Quantity</div>
+            <div>Amount</div>
+            <div>Remove</div>
+        </div>
+        {% for item in cart_items %}
+        <div class="cart-item" data-item-id="{{ item.id }}">
+            <div>{{ item.product.item }}</div>
+            <div>₹{{ item.product.price }}</div>
+            <div class="quantity-controls">
+                <form method="POST" action="{% url 'update_quantity' item.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="decrease">
+                    <button type="submit" class="btn-quantity-decrease">-</button>
+                </form>
+                <span>{{ item.quantity }}</span>
+                <form method="POST" action="{% url 'update_quantity' item.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="increase">
+                    <button type="submit" class="btn-quantity-increase">+</button>
+                </form>
+            </div>
+            <div>₹{{item.total }}</div>           
+            <div>
+                <form method="POST" action="{% url 'delete' item.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Remove</button>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+    <div class="cart-total">
+        Total: ₹{{ cart_total }}
+    </div>
+        <button id="checkout-button" class="btn">Proceed to Checkout</button>
+        <button class="btn-secondary"><a href="{% url 'home' %}" style="color: inherit; text-decoration: none;" onclick="showLoader()">Back</a></button>
+        <button class="btn-warning">
+            <a href="{% url 'download_receipt' order_id=order_id %}" style="color: inherit; text-decoration: none;" onclick="showLoader()">Download</a>
+        </button>
+    </div> 
+    
+       <!-- Loader HTML -->
+       <div class="overlay" id="overlay"></div>
+       <div class="loader" id="loader"></div>
+   
+       <!-- JavaScript for Loader -->
+       <script>
+           function showLoader() {
+               document.getElementById('loader').style.display = 'block';
+               document.getElementById('overlay').style.display = 'block';
+           }
+       </script>
+    <script>
+        document.getElementById('checkout-button').onclick = function () {
+            var totalAmount = {{ cart_total }} * 100; // Convert to paise
+
+            // Create order on the server
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{% url 'create_order' %}", true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    var options = {
+                        "key": response.razorpay_key, // Your Razorpay Key ID
+                        "amount": response.amount, // Amount in paise
+                        "currency": "INR",
+                        "name": "MyStore",
+                        "description": "Purchase Description",
+                        "order_id": response.order_id,
+                        "handler": function (response) {
+                            alert("Payment Successful");
+
+                            // Send payment response to your server for verification
+                            var xhr = new XMLHttpRequest();
+                            xhr.open("POST", "{% url 'verify' %}", true);
+                            xhr.setRequestHeader('Content-Type', 'application/json');
+                            xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+                            xhr.onload = function () {
+                                if (xhr.status === 200) {
+                                    // Redirect to download receipt
+                                    window.location.href = "/download-receipt/?order_id=" + response.razorpay_order_id;
+                                } else {
+                                    alert("Payment verification failed");
+                                }
+                            };
+                            xhr.send(JSON.stringify({
+                                "razorpay_payment_id": response.razorpay_payment_id,
+                                "razorpay_order_id": response.razorpay_order_id,
+                                "razorpay_signature": response.razorpay_signature
+                            }));
+                        },
+                        "prefill": {
+                            "name": "{{ request.user.get_full_name }}",
+                            "email": "{{ request.user.email }}",
+                            "contact": "{{ request.user.profile.phone_number }}" // Assuming you have a phone number field in the user profile
+                        },
+                        "theme": {
+                            "color": "#F37254"
+                        }
+                    };
+
+                    var paymentObject = new Razorpay(options);
+                    paymentObject.open();
+                } else {
+                    alert("Failed to create order");
+                }
+            };
+            xhr.send(JSON.stringify({
+                "amount": totalAmount
+            }));
+        };
+    </script>
+</body>
+</html>

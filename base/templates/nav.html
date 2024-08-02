@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Document</title>
+</head>
+<body>
+    
+<style>
+    /* Reset some default browser styles */
+    body, h1, p {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Styling for the navigation bar */
+    .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: rgb(241, 241, 247);
+        color: #e61d1d;
+        padding: 10px 20px;
+    }
+
+    /* Styling for the logo and title */
+    .navbar-left {
+        display: flex;
+  
+    }
+
+    .navbar-title {
+        font-size: 24px;
+        font-weight: bold;
+        
+        color:rgb(223, 13, 13);
+        align-items: center;
+
+    }
+
+    /* Styling for the login button */
+    .login-button {
+        background-color: #0074D9; /* Light blue color, you can change this */
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    /* Styling for the search bar */
+    .search-form {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 200px; /* Set the width to 200px */
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .search-button {
+        background-color: #3498DB; /* Light blue color for the button, you can change this */
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+</style>
+
+<div class="navbar">
+    
+<div>
+    
+        <h4><i class="fa fa-user" aria-hidden="true" ></i> {{ request.user.username }}</h4>
+
+</div>
+<div class="navbar-center">
+    <h1 class="navbar-title">Shopping market</h1>
+</div>
+<div>
+    {% if request.user.is_authenticated %}
+        <a href="{% url 'signout' %}"><button class="login-button">Logout</button></a>
+    {% else %}
+        <a href="{% url 'signin' %}"><button class="login-button">Login</button></a>
+    {% endif %}
+</div>
+</div>
+
+
+
+</body>
+</html>
+
+
+
+
+
